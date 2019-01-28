@@ -73,7 +73,7 @@ def bfs(maze):
         current = predecessors[current]
 
     path.append(start)
-
+    print(path)
     return path, num_states_explored
 
 
@@ -128,4 +128,22 @@ def greedy(maze):
 def astar(maze):
     # TODO: Write your code here
     # return path, num_states_explored
+    closedSet = {}
+    openSet = {}
+    cameFrom = {}
+
+    gScore = {key: value for key, value in }
+
+    startNode = maze.getStart()
+    endNode = maze.getObjectives()
+    openSet[startNode] = manhattan_dist(startNode, endNode)
+
+
     return [], 0
+
+def manhattan_dist(startNode, endNode):
+    totalSum = 0
+    for i in range(0,2):
+        totalSum += abs(startNode[i] - endNode[i])
+
+    return totalSum
