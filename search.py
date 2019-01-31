@@ -25,7 +25,6 @@ files and classes when code is run, so be careful to not modify anything else.
 import queue
 import heapq
 import math
-import pprint
 
 def search(maze, searchMethod):
     return {
@@ -36,6 +35,7 @@ def search(maze, searchMethod):
     }.get(searchMethod)(maze)
 
 
+#bfs adding last node twice
 def bfs(maze):
     # TODO: Write your code here
     # return path, num_states_explored
@@ -187,9 +187,9 @@ def astar(maze):
 
 def get_path_length(came_from, current):
     path = reconstruct_path(came_from, current)
-    print("path length")
-    print(len(path))
-    print(path)
+    #print("path length")
+    #print(len(path))
+    #print(path)
     return len(path)
 
 def reconstruct_path(came_from, current):
@@ -198,6 +198,7 @@ def reconstruct_path(came_from, current):
         current = came_from[current]
         total_path.append(current)
     
+    print(total_path)
     return total_path
 
 def get_min_f_score(openSet, fScore):
@@ -212,7 +213,7 @@ def get_min_f_score(openSet, fScore):
         #print("K: {}".format(k))
         if fScore[k] < minScore:
             minScore = fScore[k]
-            print(minScore)
+            #print(minScore)
             minK = k
     return minK
 
@@ -225,5 +226,5 @@ def manhattan_dist(startNode, endNode):
     for i in range(0,2):
         totalSum += abs(startNode[i] - endNode[i])
 
-    print("man dists: %d" %  (totalSum))
+    #("man dists: %d" %  (totalSum))
     return totalSum
