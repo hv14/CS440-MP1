@@ -23,6 +23,9 @@ files and classes when code is run, so be careful to not modify anything else.
 # searchMethod is the search method specified by --method flag (bfs,dfs,greedy,astar)
 
 import queue
+import heapq
+import math
+import pprint
 
 def search(maze, searchMethod):
     return {
@@ -132,18 +135,95 @@ def astar(maze):
     openSet = {}
     cameFrom = {}
 
-    gScore = {key: value for key, value in }
+    gScore = {} #distance from start to current node
+    fScore = {} #distance from start to current node + man dist of current node to end node
 
     startNode = maze.getStart()
-    endNode = maze.getObjectives()
-    openSet[startNode] = manhattan_dist(startNode, endNode)
+    #print("startNode")
+    #print(startNode)
+    endNode = maze.getObjectives()[0]
+   # print("endNode")
+   # print(endNode)
 
+    gScore[startNode] = 0 
+    fScore[startNode] = manhattan_dist(startNode, endNode)
+    num_states_explored = 1
 
+    openSet[startNode] = gScore[startNode] + manhattan_dist(startNode, endNode)
+
+    while (len(openSet.keys()) != 0):
+        current = get_min_f_score(openSet, fScore)
+        if (current == endNode):
+            return reconstruct_path(cameFrom, current), num_states_explored
+        
+        #print("openset")
+        #print(openSet)
+        #print("current")
+        #print(current)
+        closedSet[current] = openSet.pop(current)
+
+        for neigh in maze.getNeighbors(current[0], current[1]):
+            if (maze.isValidMove(neigh[0], neigh[1])):
+                if (neigh in closedSet): #we already explored this node
+                    continue
+                else:
+                    tScore = gScore[current] + 1 #need help on finding distance between two points
+                    
+                    if (neigh not in gScore):
+                        gScore[neigh] = math.inf
+
+                    if (neigh not in openSet):
+                        openSet[neigh] = gScore[neigh] + manhattan_dist(neigh, endNode)
+                        num_states_explored += 1
+                    elif (tScore >= gScore[neigh]):
+                        continue
+                    
+                    gScore[neigh] = tScore
+                    cameFrom[neigh] = current
+                    fScore[neigh] = gScore[neigh] + manhattan_dist(neigh, endNode)
+            
     return [], 0
+
+
+def get_path_length(came_from, current):
+    path = reconstruct_path(came_from, current)
+    print("path length")
+    print(len(path))
+    print(path)
+    return len(path)
+
+def reconstruct_path(came_from, current):
+    total_path = [current]
+    while (current in came_from.keys()):
+        current = came_from[current]
+        total_path.append(current)
+    
+    return total_path
+
+def get_min_f_score(openSet, fScore):
+    #print("fScore: {}".format(fScore))
+    #print("openSet: {}".format(openSet))
+    minScore = math.inf
+    minK = None
+    for k in openSet.keys():
+        minK = k
+
+    for k in openSet.keys():
+        #print("K: {}".format(k))
+        if fScore[k] < minScore:
+            minScore = fScore[k]
+            print(minScore)
+            minK = k
+    return minK
+
+def get_distance(node1, node2):
+    eudistance = math.sqrt(math.pow(node1[0]-node2[0],2) + math.pow(node1[1]-node2[1],2) )
+    return eudistance
 
 def manhattan_dist(startNode, endNode):
     totalSum = 0
     for i in range(0,2):
         totalSum += abs(startNode[i] - endNode[i])
 
+    print("man dists: %d" %  (totalSum))
     return totalSum
