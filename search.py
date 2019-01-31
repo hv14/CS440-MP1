@@ -23,7 +23,6 @@ files and classes when code is run, so be careful to not modify anything else.
 # searchMethod is the search method specified by --method flag (bfs,dfs,greedy,astar)
 
 import queue
-import heapq
 import math
 
 def search(maze, searchMethod):
