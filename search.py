@@ -125,6 +125,49 @@ def dfs(maze):
 def greedy(maze):
     # TODO: Write your code here
     # return path, num_states_explored
+    closedSet = {}
+    openSet = {}
+    cameFrom = {}
+
+    gScore = {} #distance from start to current node
+    fScore = {} #distance from start to current node + man dist of current node to end node
+
+    startNode = maze.getStart()
+    #print("startNode")
+    #print(startNode)
+    endNode = maze.getObjectives()[0]
+   # print("endNode")
+   # print(endNode)
+
+    fScore[startNode] = manhattan_dist(startNode, endNode)
+    num_states_explored = 1
+
+    openSet[startNode] = manhattan_dist(startNode, endNode)
+
+    while (len(openSet.keys()) != 0):
+        current = get_min_f_score(openSet, fScore)
+        if (current == endNode):
+            return reconstruct_path(cameFrom, current), num_states_explored
+        
+        #print("openset")
+        #print(openSet)
+        #print("current")
+        #print(current)
+        closedSet[current] = openSet.pop(current)
+
+        for neigh in maze.getNeighbors(current[0], current[1]):
+            if (maze.isValidMove(neigh[0], neigh[1])):
+                if (neigh in closedSet): #we already explored this node
+                    continue
+                else:
+                    
+                    if (neigh not in openSet):
+                        openSet[neigh] = manhattan_dist(neigh, endNode)
+                        num_states_explored += 1
+                    
+                    cameFrom[neigh] = current
+                    fScore[neigh] = manhattan_dist(neigh, endNode)
+            
     return [], 0
 
 
