@@ -181,51 +181,121 @@ def astar(maze):
     fScore = {} #distance from start to current node + man dist of current node to end node
 
     startNode = maze.getStart()
+    print("start node: {}".format(startNode))
     #print("startNode")
     #print(startNode)
-    endNode = maze.getObjectives()[0]
-   # print("endNode")
-   # print(endNode)
+    goalNodes = maze.getObjectives()
+    endNode = None
 
-    gScore[startNode] = 0 
-    fScore[startNode] = manhattan_dist(startNode, endNode)
-    num_states_explored = 1
+    if (len(goalNodes) > 1):  
+        path = []
+        dots = create_dict_fromlist(goalNodes)
+        print("dots: {}".format(dots))
+        current_dot = get_closet_dot(startNode, dots)
+        gScore[startNode] = 0 
+        fScore[startNode] = manhattan_dist(startNode, current_dot)
+        num_states_explored = 1
 
-    openSet[startNode] = gScore[startNode] + manhattan_dist(startNode, endNode)
+        openSet[startNode] = gScore[startNode] + manhattan_dist(startNode, current_dot)
+        while (len(dots) != 0):
+            while (len(openSet.keys()) != 0) :
+                current = get_min_f_score(openSet, fScore)
+                print("current: {}".format(current))
+                print("fScore: {}".format(openSet))
+                if (current == current_dot):
+                    dots.pop(current_dot)
+                    current_dot = get_closet_dot(current, dots)
+                    #path.extend(reconstruct_path(cameFrom, current))
+                    print("path: {}".format(path))
+                    print("current dot: {}".format(current_dot))
+                    print("dots: {}".format(dots))
+                    break
+                #print("openset")
+                #print(openSet)
+                #print("current")
+                #print(current)
+                closedSet[current] = openSet.pop(current)
+                for neigh in maze.getNeighbors(current[0], current[1]):
+                    if (maze.isValidMove(neigh[0], neigh[1])):
+                        if (neigh in closedSet): #we already explored this node
+                            continue
+                        else:
+                            tScore = gScore[current] + 1 #need help on finding distance between two points
+                            if (neigh not in gScore):
+                                gScore[neigh] = math.inf
 
-    while (len(openSet.keys()) != 0):
-        current = get_min_f_score(openSet, fScore)
-        if (current == endNode):
-            return reconstruct_path(cameFrom, current), num_states_explored
-        
-        #print("openset")
-        #print(openSet)
-        #print("current")
-        #print(current)
-        closedSet[current] = openSet.pop(current)
+                            if (neigh not in openSet):
+                                openSet[neigh] = gScore[neigh] + manhattan_dist(neigh, current_dot)
+                                num_states_explored += 1
+                            elif (tScore >= gScore[neigh]):
+                                continue
+                            
+                            gScore[neigh] = tScore
+                            cameFrom[neigh] = current
+                            fScore[neigh] = gScore[neigh] + manhattan_dist(neigh, current_dot)
 
-        for neigh in maze.getNeighbors(current[0], current[1]):
-            if (maze.isValidMove(neigh[0], neigh[1])):
-                if (neigh in closedSet): #we already explored this node
-                    continue
-                else:
-                    tScore = gScore[current] + 1 #need help on finding distance between two points
-                    
-                    if (neigh not in gScore):
-                        gScore[neigh] = math.inf
+            path.extend(reconstruct_path(cameFrom, current))
+            #print("len: {} len2: {}".format(len(openSet), len(dots)))
+        return path, num_states_explored
+    else:
+        endNode = goalNodes[0]    
+        gScore[startNode] = 0 
+        fScore[startNode] = manhattan_dist(startNode, endNode)
+        num_states_explored = 1
 
-                    if (neigh not in openSet):
-                        openSet[neigh] = gScore[neigh] + manhattan_dist(neigh, endNode)
-                        num_states_explored += 1
-                    elif (tScore >= gScore[neigh]):
+        openSet[startNode] = gScore[startNode] + manhattan_dist(startNode, endNode)
+
+        while (len(openSet.keys()) != 0):
+            current = get_min_f_score(openSet, fScore)
+            if (current == endNode):
+                return reconstruct_path(cameFrom, current), num_states_explored
+            
+            #print("openset")
+            #print(openSet)
+            #print("current")
+            #print(current)
+            closedSet[current] = openSet.pop(current)
+
+            for neigh in maze.getNeighbors(current[0], current[1]):
+                if (maze.isValidMove(neigh[0], neigh[1])):
+                    if (neigh in closedSet): #we already explored this node
                         continue
-                    
-                    gScore[neigh] = tScore
-                    cameFrom[neigh] = current
-                    fScore[neigh] = gScore[neigh] + manhattan_dist(neigh, endNode)
+                    else:
+                        tScore = gScore[current] + 1 #need help on finding distance between two points
+                        
+                        if (neigh not in gScore):
+                            gScore[neigh] = math.inf
+
+                        if (neigh not in openSet):
+                            openSet[neigh] = gScore[neigh] + manhattan_dist(neigh, endNode)
+                            num_states_explored += 1
+                        elif (tScore >= gScore[neigh]):
+                            continue
+                        
+                        gScore[neigh] = tScore
+                        cameFrom[neigh] = current
+                        fScore[neigh] = gScore[neigh] + manhattan_dist(neigh, endNode)
             
     return [], 0
 
+
+def create_dict_fromlist(goalNodes):
+    dots = {}
+    for goal in goalNodes:
+        dots[goal] = 1
+    
+    return dots
+
+def get_closet_dot(current, dots):
+    minDist = math.inf
+    r_dot = None
+    for dot in dots.keys():
+        dist = manhattan_dist(current, dot)
+        if (dist < minDist):
+            minDist = dist
+            r_dot = dot
+
+    return r_dot
 
 def get_path_length(came_from, current):
     path = reconstruct_path(came_from, current)
@@ -240,7 +310,7 @@ def reconstruct_path(came_from, current):
         current = came_from[current]
         total_path.append(current)
     
-    print(total_path)
+    #rint(total_path)
     return total_path
 
 def get_min_f_score(openSet, fScore):
